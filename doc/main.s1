@@ -1,0 +1,14 @@
+int x = 3;
+int8 x = 7;
+struct hello {
+	int x;
+	\hello y;
+};
+main: int argc, string[] argv => int {
+	string s1;
+	string s2;
+	pointer a;
+}
+{
+	return 0;
+}
