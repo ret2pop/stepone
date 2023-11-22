@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "better_string.h"
+#include "macros.h"
 #include "token.h"
 
 #include <ctype.h>
@@ -11,9 +12,13 @@
 
 lexer_t *init_lexer(char *source) {
   lexer_t *lexer = malloc(sizeof(lexer_t));
+  if (lexer == NULL)
+    die("malloc in init_lexer");
   lexer->source = source;
   lexer->i = 0;
   lexer->c = source[0];
+  lexer->row = 1;
+  lexer->col = 1;
   return lexer;
 }
 
@@ -23,8 +28,10 @@ void lexer_move(lexer_t *lexer) {
     lexer->col++;
     lexer->c = lexer->source[lexer->i];
     if (lexer->c == '\n') {
+      /* When we see a newline character, we are entering a new row, and we are
+       * returing back to the first column */
       lexer->row++;
-      lexer->col = 0;
+      lexer->col = 1;
     }
   }
 }
@@ -46,16 +53,18 @@ token_t *lexer_move_with_token(lexer_t *lexer, int type, string_t *value) {
 }
 token_t *lexer_create_id(lexer_t *lexer) {
   string_t *str = init_string(NULL);
+  char keywords[6][6] = {"if", "else", "while", "return", "struct", "func"};
+
+  char types[16][15] = {"int8",   "int16",  "int32", "uint8",
+                        "uint16", "uint32", "float", "double",
+                        "string", "int",    "void"};
 
   while (isalnum(lexer->c)) {
     string_append(str, lexer->c);
     lexer_move(lexer);
   }
 
-  char keywords[6][6] = {"if", "else", "while", "return", "struct", "func"};
-  char types[16][15] = {"int8",   "int16",  "int32", "uint8",
-                        "uint16", "uint32", "float", "double",
-                        "string", "int",    "void"};
+  /* We want to figure out if this id is actually a keyword or type */
   for (int i = 0; i < 6; i++) {
     if (strcmp(keywords[i], str->value) == 0) {
       return lexer_create_token(lexer, TOKEN_KEYWORD, str);
@@ -67,7 +76,6 @@ token_t *lexer_create_id(lexer_t *lexer) {
       return lexer_create_token(lexer, TOKEN_TYPE, str);
     }
   }
-
   return lexer_create_token(lexer, TOKEN_ID, str);
 }
 
@@ -86,15 +94,19 @@ token_t *lexer_create_number(lexer_t *lexer) {
   if (lexer->c == '0') {
     lexer_move(lexer);
     if (lexer->c == 'x') {
+      /* 0x prefix means it is a hex number */
+      lexer_move(lexer);
       return lexer_create_hex(lexer);
     }
   }
+
   while (isdigit(lexer->c) || ((lexer->c == '.') && !is_float)) {
     if (lexer->c == '.')
       is_float = true;
     string_append(str, lexer->c);
     lexer_move(lexer);
   }
+
   if (is_float) {
     return lexer_create_token(lexer, TOKEN_FLOAT, str);
   }
@@ -112,6 +124,8 @@ token_t *lexer_create_string(lexer_t *lexer) {
   return lexer_create_token(lexer, TOKEN_STRING, str);
 }
 
+/* We want to figure out if the next character makes it an arrow, an ==, or an =
+ */
 token_t *lexer_create_equals(lexer_t *lexer) {
   lexer_move(lexer);
   if (lexer->c == '>') {
@@ -122,6 +136,7 @@ token_t *lexer_create_equals(lexer_t *lexer) {
   return lexer_create_token(lexer, TOKEN_EQUALS, NULL);
 }
 
+/* helper functions to determine if something is > or >= (< or <= as well) */
 static token_t *lexer_gt(lexer_t *lexer) {
   lexer_move(lexer);
   if (lexer->c == '=') {
@@ -147,7 +162,6 @@ token_t *lexer_get_next(lexer_t *lexer) {
   } else if (isdigit(lexer->c)) {
     return lexer_create_number(lexer);
   }
-
   switch (lexer->c) {
   case '"':
     lexer_create_string(lexer);
@@ -157,6 +171,8 @@ token_t *lexer_get_next(lexer_t *lexer) {
     return lexer_gt(lexer);
   case '=':
     return lexer_create_equals(lexer);
+
+    /* One character tokens */
   case '%':
     return lexer_move_with_token(lexer, TOKEN_MOD, NULL);
   case '+':
@@ -196,7 +212,12 @@ token_t *lexer_get_next(lexer_t *lexer) {
 }
 
 void lexer_error(lexer_t *lexer) {
-  fprintf(stderr, "Error: EOF reached in lexer before finished tokenizing "
-                  "stage; Perhaps you did not close a string?\n");
+  printf("on line %d, column %d:\n", lexer->row, lexer->col);
+  fprintf(stderr,
+          "%sError: EOF reached in lexer before finished tokenizing "
+          "stage; Perhaps you did not close a string?\n%s",
+          RED, reset);
+
+  free(lexer);
   exit(1);
 }

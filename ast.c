@@ -12,4 +12,18 @@ ast_t *ast_copy(ast_t *n) { return n; }
 
 void ast_print(ast_t *n) {}
 
-void ast_free(ast_t *n) {}
+void ast_free(ast_t *n) {
+  if (n->string_value != NULL) {
+    string_free(n->string_value);
+  }
+  switch (n->type) {
+  case AST_ROOT:
+  case AST_BLOCK:
+    for (int i = 0; i < n->size; i++) {
+      ast_free(n->subnodes[i]);
+    }
+    free(n);
+  default:
+    free(n);
+  }
+}

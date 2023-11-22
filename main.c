@@ -8,11 +8,10 @@
 #include <stdlib.h>
 
 int main(int argc, char **argv) {
-  parser_t *p;
-  ast_t *root;
-  valid_t *v;
   lexer_t *l;
-  /* TEST 1: LEXER */
+
+  /* TEST 1: LEXER (see files lexer.h, lexer.c, token.h, token.c, macros.h,
+   * macros.c, better_string.h, better_string.c) */
   char *source = "int main: int argc, string argv { return 0; }";
   l = init_lexer(source);
   token_t *t = lexer_get_next(l);
@@ -25,12 +24,17 @@ int main(int argc, char **argv) {
   free(l);
 
   /* TEST 2: PARSER */
+  /* parser_t *p; */
+  /* ast_t *root; */
   /* p = init_parser("main: int argc, \\\\string argv => {} { return 0 }"); */
   /* root = parse_all(p); */
   /* ast_print(root); */
   /* ast_free(root); */
 
   /* TEST 3: VALIDATOR */
+  /* parser_t *p; */
+  /* valid_t *v; */
+  /* ast_t *root; */
   /* p = init_parser("main: int argc, \\\\string argv => { return 0 }"); */
   /* root = parse_all(p); */
   /* v = init_validator(root); */

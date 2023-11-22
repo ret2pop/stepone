@@ -2,7 +2,10 @@
 #define TOKEN_H
 #include "better_string.h"
 
+/* The token is what the lexer creates in order to group multi-character
+ * statements such as integers, strings, and variables into a single value */
 typedef struct TOKEN_STRUCT {
+  /* All the possible types the lexer can create */
   enum {
     TOKEN_LPAREN,
     TOKEN_RPAREN,
@@ -41,14 +44,18 @@ typedef struct TOKEN_STRUCT {
     TOKEN_SLASH,
   } type;
 
+  /* we store a value if we see a multi-chracter token */
   string_t *value;
   int row;
   int col;
 } token_t;
 
+/* Allocates memory for new token */
 token_t *init_token(int type, string_t *value, int row, int col);
 
+/* Prints tokens */
 void token_print(token_t *token);
 
+/* Frees memory used up by tokens */
 void token_free(token_t *token);
 #endif
