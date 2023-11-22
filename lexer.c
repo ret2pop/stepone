@@ -51,8 +51,9 @@ token_t *lexer_create_id(lexer_t *lexer) {
     lexer_move(lexer);
   }
   char keywords[6][6] = {"if", "else", "while", "return", "struct", "func"};
-  char types[15][15] = {"int8",   "int16", "int32",  "uint8",  "uint16",
-                        "uint32", "float", "double", "string", "int"};
+  char types[16][15] = {"int8",   "int16",  "int32", "uint8",
+                        "uint16", "uint32", "float", "double",
+                        "string", "int",    "void"};
   for (int i = 0; i < 4; i++) {
     if (strcmp(keywords[i], str->value) == 0) {
       return lexer_create_token(lexer, TOKEN_KEYWORD, str);
@@ -119,6 +120,22 @@ token_t *lexer_create_equals(lexer_t *lexer) {
   return lexer_create_token(lexer, TOKEN_EQUALS, NULL);
 }
 
+static token_t *lexer_gt(lexer_t *lexer) {
+  lexer_move(lexer);
+  if (lexer->c == '=') {
+    return lexer_move_with_token(lexer, TOKEN_GTE, NULL);
+  }
+  return lexer_create_token(lexer, TOKEN_GT, NULL);
+}
+
+static token_t *lexer_lt(lexer_t *lexer) {
+  lexer_move(lexer);
+  if (lexer->c == '=') {
+    return lexer_move_with_token(lexer, TOKEN_LTE, NULL);
+  }
+  return lexer_create_token(lexer, TOKEN_LT, NULL);
+}
+
 token_t *lexer_get_next(lexer_t *lexer) {
   if (isspace(lexer->c)) {
     lexer_skip_whitespace(lexer);
@@ -132,6 +149,10 @@ token_t *lexer_get_next(lexer_t *lexer) {
   switch (lexer->c) {
   case '"':
     lexer_create_string(lexer);
+  case '<':
+    return lexer_lt(lexer);
+  case '>':
+    return lexer_gt(lexer);
   case '=':
     return lexer_create_equals(lexer);
   case '%':
@@ -142,10 +163,6 @@ token_t *lexer_get_next(lexer_t *lexer) {
     return lexer_move_with_token(lexer, TOKEN_MINUS, NULL);
   case '*':
     return lexer_move_with_token(lexer, TOKEN_MUL, NULL);
-  case '<':
-    return lexer_move_with_token(lexer, TOKEN_LT, NULL);
-  case '>':
-    return lexer_move_with_token(lexer, TOKEN_GT, NULL);
   case '!':
     return lexer_move_with_token(lexer, TOKEN_EXCLAM, NULL);
   case '/':

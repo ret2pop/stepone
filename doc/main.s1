@@ -1,13 +1,17 @@
+#include "loc/of/file.s1"
+
 int x = 3;
 int8 x = 7;
-struct hello {
-	int x;
-	\hello y;
+
+struct sl_node {
+	int value;
+	\sl_node next;
 };
-main: int argc, string[] argv => int {
+
+main: int argc \string argv => int {
 	string s1;
 	string s2;
-	pointer a;
+	\int a;
 }
 {
 	return 0;

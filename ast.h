@@ -6,6 +6,7 @@ typedef struct AST_STRUCT {
     AST_ROOT,
     AST_BLOCK,
     AST_FUNCDEF,
+    AST_VAR,
     AST_FUNCPARAMS,
     AST_FUNCCALL,
     AST_MUL,
@@ -20,10 +21,20 @@ typedef struct AST_STRUCT {
     AST_STRING,
     AST_INT,
     AST_FLOAT,
-    AST_MATHEXPR,
+    AST_LT,
+    AST_EQ,
+    AST_LTE,
+    AST_GT,
+    AST_GTE,
+    AST_IF_ELSE,
+    AST_WHILE,
+    AST_RETURN,
+    AST_STRUCTURE,
+    AST_LOCAL,
   } type;
 
   string_t *string_value;
+  string_t *type_name;
   double num_value;
 
   string_t *var_name;
@@ -35,6 +46,9 @@ typedef struct AST_STRUCT {
   struct AST_STRUCT *ast_type;
 
   size_t size;
+  int priority;
+  int pcount; /* pointer count */
+  int acount; /* @ count */
 } ast_t;
 
 ast_t *init_ast(int type);
