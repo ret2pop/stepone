@@ -3,7 +3,6 @@
 #include "hash_table.h"
 #include "lexer.h"
 #include "token.h"
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,6 +69,9 @@ ast_t *parse_inside_block(parser_t *p) {
     return parse_list(p);
   case TOKEN_AT:
     return parse_var(p);
+  case TOKEN_SEMI:
+    parser_move(p);
+    return parse_inside_block(p);
   default:
     parser_error(p);
     return NULL;
@@ -151,6 +153,7 @@ ast_t *parse_block(parser_t *p) {
     b->size++;
     b->subnodes = realloc(b->subnodes, (b->size + 1) * sizeof(ast_t *));
   }
+  parser_move(p);
   return b;
 }
 
@@ -218,6 +221,7 @@ ast_t *parse_function_dec(parser_t *p) {
   funcblock = parse_block(p);
   func->subnodes[0] = varblock;
   func->subnodes[1] = funcblock;
+  func->string_value = name;
   return func;
 }
 
@@ -292,8 +296,9 @@ static ast_t *final_optree(ast_t **nodes, size_t size) {
   int priority;
   int pindex;
   if (size == 1) {
+    tree = nodes[0];
     free(nodes);
-    return nodes[0];
+    return tree;
   }
 
   for (int i = 0; i < size; i++) {
@@ -327,9 +332,8 @@ static ast_t *final_optree(ast_t **nodes, size_t size) {
 ast_t *parse_math_expr(parser_t *p) {
   /* number of possible operators and then the expressions */
   ast_t **exprs = malloc(sizeof(ast_t *));
-  size_t num_exprs;
+  size_t num_exprs = 0;
 
-  double d;
   ast_t *n;
   ast_t *o;
 
@@ -399,7 +403,12 @@ ast_t *parse_math_expr(parser_t *p) {
 }
 
 /* TODO: return string ast node that properly handles escapes */
-ast_t *parse_string(parser_t *p) { return NULL; }
+ast_t *parse_string(parser_t *p) {
+  ast_t *n = init_ast(AST_STRING);
+  n->string_value = string_copy(p->t->value);
+  parser_move(p);
+  return n;
+}
 
 ast_t *parse_if_else(parser_t *p) {
   ast_t *n = init_ast(AST_IF_ELSE);
@@ -503,6 +512,9 @@ ast_t *parse_expr(parser_t *p) {
     return parse_list(p);
   case TOKEN_AT:
     return parse_var(p);
+  case TOKEN_SEMI:
+    parser_move(p);
+    return parse_expr(p);
   default:
     parser_error(p);
     return NULL;
@@ -519,9 +531,12 @@ ast_t *parse_all(parser_t *p) {
     root->subnodes = realloc(root->subnodes, (i + 1) * sizeof(ast_t *));
   }
   root->subnodes[i] = NULL;
+  free(p->l);
+  free(p);
   return root;
 }
 
 void parser_error(parser_t *p) {
   fprintf(stderr, "lmao what the fuck did you do\n");
+  exit(1);
 }

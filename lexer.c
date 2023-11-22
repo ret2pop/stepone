@@ -46,21 +46,23 @@ token_t *lexer_move_with_token(lexer_t *lexer, int type, string_t *value) {
 }
 token_t *lexer_create_id(lexer_t *lexer) {
   string_t *str = init_string(NULL);
+
   while (isalnum(lexer->c)) {
     string_append(str, lexer->c);
     lexer_move(lexer);
   }
+
   char keywords[6][6] = {"if", "else", "while", "return", "struct", "func"};
   char types[16][15] = {"int8",   "int16",  "int32", "uint8",
                         "uint16", "uint32", "float", "double",
                         "string", "int",    "void"};
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 6; i++) {
     if (strcmp(keywords[i], str->value) == 0) {
       return lexer_create_token(lexer, TOKEN_KEYWORD, str);
     }
   }
 
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 16; i++) {
     if (strcmp(types[i], str->value) == 0) {
       return lexer_create_token(lexer, TOKEN_TYPE, str);
     }
@@ -87,7 +89,7 @@ token_t *lexer_create_number(lexer_t *lexer) {
       return lexer_create_hex(lexer);
     }
   }
-  while (isdigit(lexer->c) || (lexer->c == '.') && !is_float) {
+  while (isdigit(lexer->c) || ((lexer->c == '.') && !is_float)) {
     if (lexer->c == '.')
       is_float = true;
     string_append(str, lexer->c);
@@ -196,4 +198,5 @@ token_t *lexer_get_next(lexer_t *lexer) {
 void lexer_error(lexer_t *lexer) {
   fprintf(stderr, "Error: EOF reached in lexer before finished tokenizing "
                   "stage; Perhaps you did not close a string?\n");
+  exit(1);
 }

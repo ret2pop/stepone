@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
-valid_t *init_validator(parser_t *p) {
+valid_t *init_validator(ast_t *root) {
   valid_t *v = malloc(sizeof(valid_t));
-  v->root = parse_all(p);
+  v->root = root;
   return v;
 }

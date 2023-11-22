@@ -6,7 +6,7 @@ string_t *init_string(char *s) {
   string_t *str = malloc(sizeof(string_t));
   if (s == NULL) {
     str->bufsize = 10;
-    str->value = malloc(str->bufsize);
+    str->value = calloc(str->bufsize, sizeof(char));
     str->length = 0;
     return str;
   }
@@ -20,10 +20,11 @@ string_t *init_string(char *s) {
 string_t *string_copy(string_t *s) { return init_string(s->value); }
 
 void string_append(string_t *s, char c) {
-  if (s->bufsize == s->length + 1) {
+  char str[2] = {c, '\0'};
+  if (s->bufsize == s->length) {
     s->bufsize = s->bufsize * 2;
   }
-  char str[2] = {c, '\0'};
+  s->length++;
   strcat(s->value, str);
 }
 

@@ -56,5 +56,7 @@ ast_t *init_ast(int type);
 
 ast_t *ast_copy(ast_t *n);
 
+void ast_print(ast_t *n);
+
 void ast_free(ast_t *n);
 #endif
