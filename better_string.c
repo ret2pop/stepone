@@ -29,10 +29,23 @@ string_t *init_string(char *s) {
 
 string_t *string_copy(string_t *s) { return init_string(s->value); }
 
+/* stackoverflow code */
+void *realloc_zero(void *pBuffer, size_t oldSize, size_t newSize) {
+  void *pNew = realloc(pBuffer, newSize);
+  if (newSize > oldSize && pNew) {
+    size_t diff = newSize - oldSize;
+    void *pStart = ((char *)pNew) + oldSize;
+    memset(pStart, 0, diff);
+  }
+  return pNew;
+}
+
 void string_append(string_t *s, char c) {
   char str[2] = {c, '\0'};
-  if (s->bufsize == s->length) {
+  int oldsize = s->bufsize;
+  if (s->bufsize - 1 <= s->length) {
     s->bufsize = s->bufsize * 2;
+    s->value = realloc_zero(s->value, oldsize, s->bufsize);
   }
   s->length++;
   strcat(s->value, str);

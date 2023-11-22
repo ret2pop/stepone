@@ -1,5 +1,6 @@
 #include "ast.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 ast_t *init_ast(int type) {
@@ -8,9 +9,15 @@ ast_t *init_ast(int type) {
   return a;
 }
 
+/* TODO: implement these */
 ast_t *ast_copy(ast_t *n) { return n; }
 
-void ast_print(ast_t *n) {}
+void ast_print(ast_t *n) {
+  switch (n->type) {
+  default:
+    printf("lol\n");
+  }
+}
 
 void ast_free(ast_t *n) {
   if (n->string_value != NULL) {
