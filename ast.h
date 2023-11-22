@@ -31,6 +31,7 @@ typedef struct AST_STRUCT {
     AST_RETURN,
     AST_STRUCTURE,
     AST_LOCAL,
+    AST_TYPE,
   } type;
 
   string_t *string_value;

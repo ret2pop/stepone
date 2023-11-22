@@ -170,57 +170,54 @@ ast_t *parse_local(parser_t *p) {
   return n;
 }
 
-/* TODO: add in actual parsing */
 ast_t *parse_function_dec(parser_t *p) {
   string_t *name = string_copy(p->t->value);
   ast_t *func = init_ast(AST_FUNCDEF);
   ast_t *varblock;
   ast_t *funcblock;
+  ast_t *n;
+  ast_t *n2;
   int pcount = 0;
-  int retpcount = 0;
   parser_move(p);
   if (p->t->type != TOKEN_COLON) {
     parser_error(p);
   }
   parser_move(p);
-
-  while (p->t->type != TOKEN_ARROW && p->t->type != TOKEN_LBRACE) {
-    while (p->t->type == TOKEN_SLASH) {
-      pcount++;
-      parser_move(p);
-    }
-    if (p->t->type != TOKEN_TYPE) {
-      parser_error(p);
-    }
-    parser_move(p);
-    if (p->t->type != TOKEN_ID) {
-      parser_error(p);
-    }
-    parser_move(p);
+  func->funcdef_params = malloc(sizeof(ast_t *));
+  func->size = 0;
+  while (p->t->type != TOKEN_ARROW && p->t->type != TOKEN_LPAREN) {
+    n = parse_var_dec(p);
+    func->funcdef_params[func->size] = n;
+    func->size++;
+    func->funcdef_params =
+        realloc(func->funcdef_params, (1 + func->size) * sizeof(ast_t *));
   }
   if (p->t->type == TOKEN_ARROW) {
     parser_move(p);
-    while (p->t->type == TOKEN_SLASH) {
-      retpcount++;
-      parser_move(p);
-    }
-    if (p->t->type != TOKEN_TYPE) {
+    if (p->t->type != TOKEN_TYPE && p->t->type != TOKEN_SLASH &&
+        p->t->type != TOKEN_ID) {
       parser_error(p);
     }
+    while (p->t->type == TOKEN_SLASH) {
+      parser_move(p);
+      pcount++;
+    }
+    if (p->t->type != TOKEN_TYPE && p->t->type != TOKEN_ID) {
+      parser_error(p);
+    }
+    n2 = init_ast(AST_TYPE);
+    n2->string_value = string_copy(p->t->value);
     parser_move(p);
+    n->ast_type = n;
   }
   if (p->t->type != TOKEN_LBRACE) {
     parser_error(p);
   }
-  parser_move(p);
-  while (p->t->type != TOKEN_RBRACE) {
-  }
-  parser_move(p);
-  if (p->t->type != TOKEN_LBRACE) {
-    parser_error(p);
-  }
+  func->subnodes = malloc(2 * sizeof(ast_t *));
   varblock = parse_local(p);
   funcblock = parse_block(p);
+  func->subnodes[0] = varblock;
+  func->subnodes[1] = funcblock;
   return func;
 }
 
@@ -498,7 +495,8 @@ ast_t *parse_expr(parser_t *p) {
   case TOKEN_FLOAT:
     return parse_math_expr(p);
   case TOKEN_ID:
-    return parse_var(p);
+    return parse_var(
+        p); /* TODO: make it so that this can also be a var_dec in the end */
   case TOKEN_STRING:
     return parse_string(p);
   case TOKEN_LBRACKET:
