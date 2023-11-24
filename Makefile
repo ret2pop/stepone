@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS  = -g -Wall
 
-stepone: main.c lexer.c better_string.c
+stepone: main.c lexer.c better_string.c parser.c ast.c token.c
 	cc *.c $(CFLAGS) -o stepone 
 
 clean:

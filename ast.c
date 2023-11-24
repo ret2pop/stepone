@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 ast_t *init_ast(int type) {
-  ast_t *a = malloc(sizeof(ast_t));
+  ast_t *a = calloc(1, sizeof(ast_t));
   a->type = type;
   return a;
 }
@@ -93,15 +93,13 @@ void ast_print(ast_t *n) {
 }
 
 void ast_free(ast_t *n) {
-  if (n->string_value != NULL) {
-    string_free(n->string_value);
-  }
   switch (n->type) {
   case AST_ROOT:
   case AST_BLOCK:
   case AST_LOCAL:
   case AST_FUNCCALL:
     for (int i = 0; i < n->size; i++) {
+      printf("iteration: %d\n", i);
       ast_free(n->subnodes[i]);
     }
     free(n->subnodes);

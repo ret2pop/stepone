@@ -45,17 +45,20 @@ static ast_t *parse_inner_expr(parser_t *p) {
 }
 
 ast_t *parse_inside_block(parser_t *p) {
-  if (strcmp(p->t->value->value, "if") == 0) {
-    return parse_if_else(p);
-  } else if (strcmp(p->t->value->value, "while") == 0) {
-    return parse_while(p);
-  } else if (strcmp(p->t->value->value, "return") == 0) {
-    return parse_return(p);
+  if (p->t->value != NULL) {
+    if (strcmp(p->t->value->value, "if") == 0) {
+      return parse_if_else(p);
+    } else if (strcmp(p->t->value->value, "while") == 0) {
+      return parse_while(p);
+    } else if (strcmp(p->t->value->value, "return") == 0) {
+      return parse_return(p);
+    }
   }
 
   switch (p->t->type) {
   case TOKEN_LBRACE:
     return parse_math_expr(p);
+  case TOKEN_LPAREN:
   case TOKEN_INT:
     return parse_math_expr(p);
   case TOKEN_FLOAT:
@@ -175,6 +178,7 @@ ast_t *parse_block(parser_t *p) {
   if (b->subnodes == NULL)
     die("malloc on subnodes");
   b->size = 0;
+  parser_move(p);
   while (p->t->type != TOKEN_RBRACE) {
     b->subnodes[b->size] = parse_inside_block(p);
     b->size++;
@@ -220,7 +224,7 @@ ast_t *parse_function_dec(parser_t *p) {
   if (func->funcdef_params == NULL)
     die("malloc on subnodes");
   func->size = 0;
-  while (p->t->type != TOKEN_ARROW && p->t->type != TOKEN_LPAREN) {
+  while (p->t->type != TOKEN_ARROW && p->t->type != TOKEN_LBRACE) {
     n = parse_var_dec(p);
     func->funcdef_params[func->size] = n;
     func->size++;
@@ -231,6 +235,7 @@ ast_t *parse_function_dec(parser_t *p) {
     parser_move(p);
     if (p->t->type != TOKEN_TYPE && p->t->type != TOKEN_SLASH &&
         p->t->type != TOKEN_ID) {
+      printf("entering error\n");
       parser_error(p);
     }
     while (p->t->type == TOKEN_SLASH) {
@@ -242,8 +247,8 @@ ast_t *parse_function_dec(parser_t *p) {
     }
     n2 = init_ast(AST_TYPE);
     n2->string_value = string_copy(p->t->value);
-    parser_move(p);
     n->ast_type = n;
+    parser_move(p);
   }
   if (p->t->type != TOKEN_LBRACE) {
     parser_error(p);
@@ -323,11 +328,12 @@ static ast_t *op_get(parser_t *p) {
   return e;
 }
 
+/* This constructs the final operator tree from parse_math_expr */
 static ast_t *final_optree(ast_t **nodes, size_t size) {
   ast_t *tree;
   size_t leftsize;
   size_t rightsize;
-  int priority;
+  int priority = 0;
   int pindex;
   if (size == 1) {
     tree = nodes[0];
@@ -336,7 +342,7 @@ static ast_t *final_optree(ast_t **nodes, size_t size) {
   }
 
   for (int i = 0; i < size; i++) {
-    if (priority < nodes[i]->priority) {
+    if (priority <= nodes[i]->priority) {
       priority = nodes[i]->priority;
       pindex = i;
     }
@@ -344,37 +350,37 @@ static ast_t *final_optree(ast_t **nodes, size_t size) {
 
   tree = nodes[pindex];
   leftsize = pindex;
-  rightsize = size - pindex - 1;
+  rightsize = size - pindex;
 
-  tree->subnodes = malloc(2 * sizeof(ast_t *));
+  tree->subnodes = calloc(2, sizeof(ast_t *));
   if (tree->subnodes == NULL)
-    die("malloc on subnodes");
-  ast_t **left = malloc(leftsize * sizeof(ast_t *));
+    die("calloc on subnodes");
+  ast_t **left = calloc(leftsize, sizeof(ast_t *));
   if (left == NULL)
-    die("malloc on left");
+    die("calloc on left");
   for (int i = 0; i < leftsize; i++) {
     left[i] = nodes[i];
   }
   tree->subnodes[0] = final_optree(left, leftsize);
 
-  ast_t **right = malloc(rightsize * sizeof(ast_t *));
-
+  ast_t **right = calloc(rightsize, sizeof(ast_t *));
   if (right == NULL)
-    die("malloc on right");
+    die("calloc on right");
+
   for (int i = 0; i < rightsize; i++) {
     right[i] = nodes[pindex + i + 1];
   }
-  tree->subnodes[1] = final_optree(right, rightsize);
 
+  tree->subnodes[1] = final_optree(right, rightsize);
   free(nodes);
   return tree;
 }
 
 ast_t *parse_math_expr(parser_t *p) {
   /* number of possible operators and then the expressions */
-  ast_t **exprs = malloc(sizeof(ast_t *));
+  ast_t **exprs = calloc(1, sizeof(ast_t *));
   if (exprs == NULL)
-    die("malloc on exprs");
+    die("calloc on exprs");
   size_t num_exprs = 0;
 
   ast_t *n;
@@ -441,7 +447,6 @@ ast_t *parse_math_expr(parser_t *p) {
   }
 
   n = final_optree(exprs, num_exprs);
-  free(exprs);
   return n;
 }
 
@@ -464,15 +469,18 @@ ast_t *parse_if_else(parser_t *p) {
   parser_move(p);
   l = parse_math_expr(p);
   b = parse_block(p);
-  if (strcmp(p->t->value->value, "else") == 0) {
-    parser_move(p);
-    if (strcmp(p->t->value->value, "if") == 0) {
-      n2 = parse_if_else(p);
-    } else if (p->t->type == TOKEN_LBRACE) {
-      n2 = parse_block(p);
-    } else {
-      parser_error(p);
-    }
+  if (p->t->value != NULL) {
+    if (strcmp(p->t->value->value, "else") == 0) {
+      parser_move(p);
+      if (strcmp(p->t->value->value, "if") == 0) {
+        n2 = parse_if_else(p);
+      } else if (p->t->type == TOKEN_LBRACE) {
+        n2 = parse_block(p);
+      } else {
+        parser_error(p);
+      }
+    } else
+      n2 = NULL;
   } else
     n2 = NULL;
 
@@ -513,6 +521,7 @@ ast_t *parse_return(parser_t *p) {
   parser_move(p);
   ast_t *expr = parse_inner_expr(p);
   ret->subnodes = malloc(sizeof(ast_t *));
+  ret->size = 1;
   if (ret->subnodes == NULL)
     die("malloc on subnodes");
   ret->subnodes[0] = expr;
@@ -598,7 +607,6 @@ void parser_error(parser_t *p) {
   else
     fprintf(stderr, "%sPARSER ERROR: Unexpected Token of type `%s`%s\n", RED,
             token_to_str(p->t), reset);
-  token_print(p->t);
   token_free(p->t);
   free(p->l);
   free(p);

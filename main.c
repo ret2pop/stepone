@@ -52,7 +52,8 @@ int main(int argc, char **argv) {
   /* TEST 2: PARSER (see files ast.h, ast.c, parser.h, parser.c) */
   parser_t *p;
   ast_t *root;
-  p = init_parser("func main: int argc \\\\string argv => {} { return 0 }");
+  p = init_parser(
+      "func main: int argc \\\\string argv => int {} { (1 + 2 + 3) }");
   root = parse_all(p);
   ast_print(root);
   ast_free(root);
