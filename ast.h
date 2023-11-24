@@ -2,7 +2,15 @@
 #define AST_H
 #include "better_string.h"
 
+/* The Abstract Syntax Tree (AST) is a representation of the source file in a
+ * more program-readable form. It encodes the file in a recursive tree format
+ * where the bottom left of the tree represents jobs that need to be done first
+ * and the bottom right of the tree represents the jobs that need to be done
+ * last, where the layers of the tree represent which jobs need to be done in
+ * order for a more abstract job to be done. */
+
 typedef struct AST_STRUCT {
+  /* All possible AST types */
   enum {
     AST_ROOT,
     AST_BLOCK,
@@ -35,6 +43,7 @@ typedef struct AST_STRUCT {
     AST_TYPE,
   } type;
 
+  /* Based on the type of the node, these values are used differently */
   string_t *string_value;
   string_t *type_name;
   double num_value;

@@ -1,16 +1,18 @@
 Stepone
+-----------------------------------------------------------------------------------------------------------------------
 
 Stepone is the first step to a bootstrapping operating system; first, as a proof of concept,
 stepone and its associated assembler ministep will be self hosting on unix-like operaing systems.
 Steptwo will be a kernel written in stepone whose purpose is to run an implementation of stepone, which can then
 run the selfhosted version of stepone, still targetting ministep but perhaps generating the assembly
-with different syscalls. It will need a filesystem, a text editor, and a tcp/ip stack (can't really get around
+with different syscalls. It will need a filesystem, a text editor, a tcp/ip stack (can't really get around
 having one of those in the modern age. Perhaps packet radio is a good contender for the first tcp/ip stack this
-should have?). After this point, steptwo can continue pulling itself though more steps without any reliance on external
-systems.
+should have?), a stepone compiler, and a standard library. After this point, steptwo can continue pulling itself
+though more steps without any reliance on external systems.
 
-It is a question as to what Steptwo will target. One possiblity is x86, another is ARM, and another is RISC-V. Probably x86
-development is a good idea but the possiblity of RISC-V is enticing because it would be possible to run a very transparent system.
+It is a question as to what Steptwo will target. One possiblity is x86, another is ARM, and another is RISC-V. Probably
+x86 development is a good idea but the possiblity of RISC-V is enticing because it would be possible to run a very
+transparent system.
 
-It will not be a unix. It will be a new paradigm, and realistically it will probably be worse than the unix one, but I'm aiming for
-completion first.
+It will not be a unix. It will be a new paradigm, and realistically it will probably be worse than the unix one, but
+I'm aiming for completion first.
