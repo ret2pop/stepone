@@ -53,6 +53,7 @@ typedef struct TOKEN_STRUCT {
 /* Allocates memory for new token */
 token_t *init_token(int type, string_t *value, int row, int col);
 
+char *token_to_str(token_t *token);
 /* Prints tokens */
 void token_print(token_t *token);
 

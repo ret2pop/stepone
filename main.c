@@ -10,7 +10,6 @@
 void usage() { fprintf(stderr, "Usage: stepone [file]\n"); }
 
 int main(int argc, char **argv) {
-  lexer_t *l;
   /* READING A FILE: */
   /* char *buffer = 0; */
   /* long length; */
@@ -38,6 +37,7 @@ int main(int argc, char **argv) {
 
   /* TEST 1: LEXER (see files lexer.h, lexer.c, token.h, token.c, macros.h,
    * macros.c, better_string.h, better_string.c) */
+  /* lexer_t *l; */
   /* char *source = "int main: int argc, string argv { return 0; }"; */
   /* l = init_lexer(source); */
   /* token_t *t = lexer_get_next(l); */

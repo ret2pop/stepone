@@ -8,7 +8,7 @@ struct sl_node {
 	\sl_node next;
 };
 
-func main: int argc \string argv => int {
+func main: int argc \\string argv => int {
 	string s1;
 	string s2;
 	\int a;

@@ -155,12 +155,12 @@ ast_t *parse_var_dec(parser_t *p) {
     pcount++;
     parser_move(p);
   }
-  if (p->t->type != TOKEN_ID && p->t->type != TOKEN_KEYWORD) {
+  if (p->t->type != TOKEN_ID && p->t->type != TOKEN_TYPE) {
     parser_error(p);
   }
   n->type_name = string_copy(p->t->value);
   parser_move(p);
-  if (p->t->type != TOKEN_ID && p->t->type != TOKEN_KEYWORD) {
+  if (p->t->type != TOKEN_ID) {
     parser_error(p);
   }
   n->string_value = string_copy(p->t->value);
@@ -192,7 +192,7 @@ ast_t *parse_local(parser_t *p) {
     die("malloc on subnodes");
   n->size = 0;
   parser_move(p);
-  while (p->t->type != TOKEN_LBRACE) {
+  while (p->t->type != TOKEN_RBRACE) {
     v = parse_var_dec(p);
     n->subnodes[n->size] = v;
     n->size++;
@@ -592,7 +592,12 @@ ast_t *parse_all(parser_t *p) {
 
 void parser_error(parser_t *p) {
   printf("On line %d, column %d:\n", p->t->row, p->t->col);
-  fprintf(stderr, "%sPARSER ERROR: Unexpected Token:%s\n", RED, reset);
+  if (p->t->value != NULL)
+    fprintf(stderr, "%sPARSER ERROR: Unexpected Token of type `%s`: %s%s\n",
+            RED, token_to_str(p->t), p->t->value->value, reset);
+  else
+    fprintf(stderr, "%sPARSER ERROR: Unexpected Token of type `%s`%s\n", RED,
+            token_to_str(p->t), reset);
   token_print(p->t);
   token_free(p->t);
   free(p->l);

@@ -1,6 +1,7 @@
 #ifndef AST_H
 #define AST_H
 #include "better_string.h"
+
 typedef struct AST_STRUCT {
   enum {
     AST_ROOT,
@@ -53,11 +54,15 @@ typedef struct AST_STRUCT {
   int acount; /* @ count */
 } ast_t;
 
+/* Allocates space for new Abstract Syntax Tree (AST) */
 ast_t *init_ast(int type);
 
+/* Deep copy of AST */
 ast_t *ast_copy(ast_t *n);
 
+/* Prints AST node recursively */
 void ast_print(ast_t *n);
 
+/* Recursive free of AST */
 void ast_free(ast_t *n);
 #endif
