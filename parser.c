@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "macros.h"
 #include "token.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -264,7 +265,7 @@ ast_t *parse_function_dec(parser_t *p) {
   return func;
 }
 
-int is_op(parser_t *p) {
+bool is_op(parser_t *p) {
   switch (p->t->type) {
   case TOKEN_PLUS:
   case TOKEN_MINUS:
@@ -278,9 +279,9 @@ int is_op(parser_t *p) {
   case TOKEN_LEQUALS:
   case TOKEN_AND:
   case TOKEN_OR:
-    return 1;
+    return true;
   default:
-    return 0;
+    return false;
   }
 }
 
@@ -331,10 +332,10 @@ static ast_t *op_get(parser_t *p) {
 /* This constructs the final operator tree from parse_math_expr */
 static ast_t *final_optree(ast_t **nodes, size_t size) {
   ast_t *tree;
-  size_t leftsize;
-  size_t rightsize;
+  size_t leftsize = 0;
+  size_t rightsize = 0;
   int priority = 0;
-  int pindex;
+  int pindex = 0;
   if (size == 1) {
     tree = nodes[0];
     free(nodes);
@@ -349,8 +350,8 @@ static ast_t *final_optree(ast_t **nodes, size_t size) {
   }
 
   tree = nodes[pindex];
-  leftsize = pindex;
-  rightsize = size - pindex;
+  leftsize = pindex + 1;
+  rightsize = size - pindex - 1;
 
   tree->subnodes = calloc(2, sizeof(ast_t *));
   if (tree->subnodes == NULL)
@@ -389,6 +390,7 @@ ast_t *parse_math_expr(parser_t *p) {
   if (p->t->type == TOKEN_LPAREN) {
     parser_move(p);
     n = parse_math_expr(p);
+    n->priority = 0;
     if (p->t->type != TOKEN_RPAREN) {
       parser_error(p);
     }
