@@ -6,6 +6,7 @@
 /* The purpose of the lexer is to loop through the source file in order to group
  * together certain multi-character symbols into single tokens. For consistency,
  * one-character tokens are also allowed. */
+
 typedef struct LEXER_STRUCT {
   /* The source file that is written in our language */
   char *source;
@@ -47,7 +48,8 @@ token_t *lexer_create_equals(lexer_t *lexer);
 token_t *lexer_create_token(lexer_t *lexer, int type, string_t *value);
 
 /* We don't want to get stuck in a loop of seeing the same token over and over
- * again */
+ * again, so we write a helper function to move the lexer while returning the
+ * token */
 token_t *lexer_move_with_token(lexer_t *lexer, int type, string_t *value);
 
 /* The main function that we call; it simply gets the next token */

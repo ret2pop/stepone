@@ -1,14 +1,14 @@
 #include "loc/of/file.s1"
 
-int x = 3;
-int8 x = 7;
+global int x = 3;
+global int8 x = 7;
 
 struct sl_node {
 	int value;
 	\sl_node next;
 };
 
-main: int argc \string argv => int {
+func main: int argc \string argv => int {
 	string s1;
 	string s2;
 	\int a;

@@ -32,6 +32,8 @@ string_t *string_copy(string_t *s) { return init_string(s->value); }
 /* stackoverflow code */
 void *realloc_zero(void *pBuffer, size_t oldSize, size_t newSize) {
   void *pNew = realloc(pBuffer, newSize);
+  if (pNew == NULL)
+    die("realloc on realloc_zero");
   if (newSize > oldSize && pNew) {
     size_t diff = newSize - oldSize;
     void *pStart = ((char *)pNew) + oldSize;

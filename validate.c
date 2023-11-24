@@ -8,3 +8,5 @@ valid_t *init_validator(ast_t *root) {
   v->root = root;
   return v;
 }
+
+void validate(valid_t *v) {}

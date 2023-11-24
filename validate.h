@@ -5,6 +5,7 @@
 
 typedef struct {
   ast_t *root;
+  ast_t *cur_node;
   hash_table_t *func_sig;
   hash_table_t *global_sig;
 } valid_t;

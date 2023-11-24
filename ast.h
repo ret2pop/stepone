@@ -48,6 +48,7 @@ typedef struct AST_STRUCT {
 
   size_t size;
   int priority;
+
   int pcount; /* pointer count */
   int acount; /* @ count */
 } ast_t;

@@ -20,9 +20,9 @@ void token_print(token_t *token) {
     return;
   /* Single character tokens do not have a value */
   if (token->value == NULL)
-    printf("%d\n", token->type);
+    fprintf(stderr, "%d\n", token->type);
   else
-    printf("%d, %s\n", token->type, token->value->value);
+    fprintf(stderr, "%d, %s\n", token->type, token->value->value);
 }
 
 void token_free(token_t *token) {

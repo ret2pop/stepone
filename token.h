@@ -58,4 +58,5 @@ void token_print(token_t *token);
 
 /* Frees memory used up by tokens */
 void token_free(token_t *token);
+
 #endif
