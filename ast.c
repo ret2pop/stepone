@@ -35,7 +35,7 @@ void ast_print(ast_t *n) {
     ast_print(n->subnodes[1]);
     break;
   case AST_VARDEC:
-    printf("Variable decaration: %s, %s", n->type_name->value,
+    printf("Variable decaration: %s, %s\n", n->type_name->value,
            n->string_value->value);
     break;
   case AST_VARDEF:
@@ -151,6 +151,7 @@ void ast_free(ast_t *n) {
   case AST_INT:
   case AST_FLOAT:
     free(n);
+    break;
   case AST_IF_ELSE:
     printf("if or if-else statement\n");
     ast_free(n->subnodes[0]);

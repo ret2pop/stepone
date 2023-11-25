@@ -220,11 +220,13 @@ ast_t *parse_function_dec(parser_t *p) {
   if (p->t->type != TOKEN_COLON) {
     parser_error(p);
   }
+
   parser_move(p);
   func->funcdef_params = malloc(sizeof(ast_t *));
   if (func->funcdef_params == NULL)
     die("malloc on subnodes");
   func->size = 0;
+
   while (p->t->type != TOKEN_ARROW && p->t->type != TOKEN_LBRACE) {
     n = parse_var_dec(p);
     func->funcdef_params[func->size] = n;
@@ -232,6 +234,7 @@ ast_t *parse_function_dec(parser_t *p) {
     func->funcdef_params =
         realloc(func->funcdef_params, (1 + func->size) * sizeof(ast_t *));
   }
+
   if (p->t->type == TOKEN_ARROW) {
     parser_move(p);
     if (p->t->type != TOKEN_TYPE && p->t->type != TOKEN_SLASH &&
@@ -350,7 +353,7 @@ static ast_t *final_optree(ast_t **nodes, size_t size) {
   }
 
   tree = nodes[pindex];
-  leftsize = pindex + 1;
+  leftsize = pindex;
   rightsize = size - pindex - 1;
 
   tree->subnodes = calloc(2, sizeof(ast_t *));
@@ -444,8 +447,6 @@ ast_t *parse_math_expr(parser_t *p) {
     exprs = realloc(exprs, (num_exprs + 2) * sizeof(ast_t *));
     exprs[num_exprs] = n;
     num_exprs++;
-
-    parser_move(p);
   }
 
   n = final_optree(exprs, num_exprs);
@@ -589,13 +590,13 @@ ast_t *parse_all(parser_t *p) {
   root->subnodes = malloc(sizeof(ast_t *));
   if (root->subnodes == NULL)
     die("malloc on subnodes");
-  int i = 0;
+  root->size = 0;
   while (p->t != NULL) {
-    root->subnodes[i] = parse_expr(p);
-    i++;
-    root->subnodes = realloc(root->subnodes, (i + 1) * sizeof(ast_t *));
+    root->subnodes[root->size] = parse_expr(p);
+    root->size++;
+    root->subnodes =
+        realloc(root->subnodes, (root->size + 1) * sizeof(ast_t *));
   }
-  root->subnodes[i] = NULL;
   free(p->l);
   free(p);
   return root;
