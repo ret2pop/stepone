@@ -166,7 +166,7 @@ token_t *lexer_get_next(lexer_t *lexer) {
   }
   switch (lexer->c) {
   case '"':
-    lexer_create_string(lexer);
+    return lexer_create_string(lexer);
   case '<':
     return lexer_lt(lexer);
   case '>':

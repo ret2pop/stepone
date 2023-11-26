@@ -20,6 +20,7 @@ void ast_print(ast_t *n) {
   case AST_BLOCK:
   case AST_LOCAL:
   case AST_FUNCCALL:
+  case AST_LIST:
     if (n->type == AST_FUNCCALL)
       printf("func name: %s\n", n->string_value->value);
     printf("Compound node:\n");
@@ -75,7 +76,6 @@ void ast_print(ast_t *n) {
     ast_print(n->subnodes[1]);
     if (n->subnodes[2] != NULL)
       ast_print(n->subnodes[2]);
-
     break;
   case AST_WHILE:
     printf("while loop:\n");
@@ -100,6 +100,7 @@ void ast_free(ast_t *n) {
   case AST_ROOT:
   case AST_BLOCK:
   case AST_LOCAL:
+  case AST_LIST:
   case AST_FUNCCALL:
     for (int i = 0; i < n->size; i++) {
       ast_free(n->subnodes[i]);
@@ -160,7 +161,6 @@ void ast_free(ast_t *n) {
     free(n);
     break;
   case AST_IF_ELSE:
-    printf("if or if-else statement\n");
     ast_free(n->subnodes[0]);
     ast_free(n->subnodes[1]);
     if (n->subnodes[2] != NULL)
@@ -169,7 +169,6 @@ void ast_free(ast_t *n) {
     free(n);
     break;
   case AST_WHILE:
-    printf("while loop:\n");
     ast_free(n->subnodes[0]);
     ast_free(n->subnodes[1]);
     free(n->subnodes);

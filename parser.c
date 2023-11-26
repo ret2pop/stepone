@@ -27,12 +27,10 @@ static ast_t *parse_inner_expr(parser_t *p) {
   switch (p->t->type) {
   case TOKEN_LPAREN:
     return parse_math_expr(p);
+  case TOKEN_ID:
   case TOKEN_INT:
-    return parse_math_expr(p);
   case TOKEN_FLOAT:
     return parse_math_expr(p);
-  case TOKEN_ID:
-    return parse_var(p);
   case TOKEN_STRING:
     return parse_string(p);
   case TOKEN_LBRACKET:
@@ -65,7 +63,7 @@ ast_t *parse_inside_block(parser_t *p) {
   case TOKEN_SLASH:
   case TOKEN_ID:
   case TOKEN_AT:
-    return parse_var(p);
+    return parse_var_assign(p);
   case TOKEN_STRING:
     return parse_string(p);
   case TOKEN_LBRACKET:
@@ -77,6 +75,55 @@ ast_t *parse_inside_block(parser_t *p) {
     parser_error(p);
     return NULL;
   }
+}
+
+ast_t *parse_var_assign(parser_t *p) {
+  ast_t *n;
+  ast_t *n2;
+  string_t *str;
+  int pcount = 0;
+  while (p->t->type == TOKEN_SLASH) {
+    pcount++;
+    parser_move(p);
+  }
+  str = string_copy(p->t->value);
+  parser_move(p);
+  if (p->t->type == TOKEN_EQUALS) {
+    n = init_ast(AST_VARDEF);
+    n->string_value = str;
+    n->subnodes = malloc(sizeof(ast_t *));
+    if (n->subnodes == NULL)
+      die("malloc on subnodes");
+    n->size = 1;
+    parser_move(p);
+    n->subnodes[0] = parse_inner_expr(p);
+    n->pcount = pcount;
+  } else if (p->t->type == TOKEN_LPAREN && pcount == 0) {
+    parser_move(p);
+    n = init_ast(AST_FUNCCALL);
+    n->string_value = str;
+    n->subnodes = malloc(sizeof(ast_t *));
+    if (n->subnodes == NULL)
+      die("malloc on subnodes");
+    n->size = 0;
+    while (p->t->type != TOKEN_RPAREN) {
+      n2 = parse_inner_expr(p);
+      if (n2->type == AST_VARDEF)
+        parser_error(p);
+
+      if (p->t->type != TOKEN_COMMA && p->t->type != TOKEN_RPAREN) {
+        parser_error(p);
+      }
+      if (p->t->type != TOKEN_RPAREN)
+        parser_move(p);
+      n->subnodes[n->size] = n2;
+      n->size++;
+      n->subnodes = realloc(n->subnodes, (n->size + 1) * sizeof(ast_t *));
+    }
+    parser_move(p);
+  } else
+    parser_error(p);
+  return n;
 }
 
 ast_t *parse_var(parser_t *p) {
@@ -102,21 +149,7 @@ ast_t *parse_var(parser_t *p) {
 
   str = string_copy(p->t->value);
   parser_move(p);
-  if (p->t->type == TOKEN_EQUALS && atcount == 0) {
-    n = init_ast(AST_VARDEF);
-    n->string_value = str;
-    n->subnodes = malloc(sizeof(ast_t *));
-    if (n->subnodes == NULL)
-      die("malloc on subnodes");
-    n->size = 1;
-    parser_move(p);
-    n->subnodes[0] = parse_inner_expr(p);
-    if (n->subnodes[0]->type == AST_VARDEF) {
-      parser_error(p);
-    }
-
-    n->pcount = pcount;
-  } else if (p->t->type == TOKEN_LPAREN) {
+  if (p->t->type == TOKEN_LPAREN) {
     if (atcount != 0) {
       parser_error(p);
     }
@@ -124,6 +157,7 @@ ast_t *parse_var(parser_t *p) {
     n = init_ast(AST_FUNCCALL);
     n->string_value = str;
     n->subnodes = malloc(sizeof(ast_t *));
+    n->priority = 0;
     if (n->subnodes == NULL)
       die("malloc on subnodes");
     n->size = 0;
@@ -145,6 +179,7 @@ ast_t *parse_var(parser_t *p) {
   } else {
     n = init_ast(AST_VAR);
     n->string_value = str;
+    n->priority = 0;
     n->acount = atcount;
     n->pcount = pcount;
   }
@@ -396,6 +431,7 @@ ast_t *parse_math_expr(parser_t *p) {
     if (p->t->type != TOKEN_RPAREN) {
       parser_error(p);
     }
+    parser_move(p);
   } else if (p->t->type == TOKEN_INT || p->t->type == TOKEN_FLOAT) {
     if (p->t->type == TOKEN_INT)
       n = init_ast(AST_INT);
@@ -403,14 +439,14 @@ ast_t *parse_math_expr(parser_t *p) {
       n = init_ast(AST_FLOAT);
     n->num_value = atof(p->t->value->value);
     n->priority = 0;
+    parser_move(p);
   } else if (p->t->type == TOKEN_ID) {
-    n = init_ast(AST_VAR);
+    n = parse_var(p);
     n->priority = 0;
   } else {
     parser_error(p);
   }
 
-  parser_move(p);
   exprs[0] = n;
   num_exprs++;
 
@@ -428,6 +464,7 @@ ast_t *parse_math_expr(parser_t *p) {
       if (p->t->type != TOKEN_RPAREN) {
         parser_error(p);
       }
+      parser_move(p);
     } else if (p->t->type == TOKEN_INT || p->t->type == TOKEN_FLOAT) {
       if (p->t->type == TOKEN_INT)
         n = init_ast(AST_INT);
@@ -435,14 +472,13 @@ ast_t *parse_math_expr(parser_t *p) {
         n = init_ast(AST_FLOAT);
       n->num_value = atof(p->t->value->value);
       n->priority = 0;
+      parser_move(p);
     } else if (p->t->type == TOKEN_ID) {
-      n = init_ast(AST_VAR);
-      n->priority = 0;
+      n = parse_var(p);
     } else {
       parser_error(p);
     }
 
-    parser_move(p);
     exprs = realloc(exprs, (num_exprs + 2) * sizeof(ast_t *));
     exprs[num_exprs] = n;
     num_exprs++;
@@ -460,8 +496,20 @@ ast_t *parse_string(parser_t *p) {
   return n;
 }
 
-/* TODO: Implement this */
-ast_t *parse_list(parser_t *p) { return NULL; }
+ast_t *parse_list(parser_t *p) {
+  ast_t *n;
+  ast_t *l = init_ast(AST_LIST);
+  l->subnodes = calloc(1, sizeof(ast_t *));
+  l->size = 0;
+  while (p->t->type != TOKEN_RBRACKET) {
+    n = parse_inner_expr(p);
+    l->subnodes[l->size] = n;
+    l->size++;
+    l->subnodes = realloc(l->subnodes, (l->size + 1) * sizeof(ast_t *));
+  }
+  parser_move(p);
+  return l;
+}
 
 ast_t *parse_if_else(parser_t *p) {
   ast_t *n = init_ast(AST_IF_ELSE);
@@ -500,21 +548,14 @@ ast_t *parse_while(parser_t *p) {
   ast_t *n = init_ast(AST_WHILE);
   ast_t *b;
   parser_move(p);
-  if (p->t->type != TOKEN_LPAREN) {
-    parser_error(p);
-  }
   ast_t *logic = parse_math_expr(p);
-  if (p->t->type != TOKEN_RPAREN) {
-    parser_error(p);
-  }
-  parser_move(p);
   b = parse_block(p);
   n->subnodes = malloc(2 * sizeof(ast_t *));
   if (n->subnodes == NULL)
     die("malloc on subnodes");
   n->subnodes[0] = logic;
   n->subnodes[1] = b;
-  n->size = 1;
+  n->size = 2;
   return n;
 }
 
@@ -560,15 +601,11 @@ ast_t *parse_expr(parser_t *p) {
   switch (p->t->type) {
   case TOKEN_SLASH:
     return parse_var_dec(p);
-  case TOKEN_LBRACE:
-    return parse_math_expr(p);
+  case TOKEN_ID:
+  case TOKEN_LPAREN:
   case TOKEN_INT:
-    return parse_math_expr(p);
   case TOKEN_FLOAT:
     return parse_math_expr(p);
-  case TOKEN_ID:
-    return parse_var(
-        p); /* TODO: make it so that this can also be a var_dec in the end */
   case TOKEN_STRING:
     return parse_string(p);
   case TOKEN_LBRACKET:

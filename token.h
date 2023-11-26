@@ -53,7 +53,12 @@ typedef struct TOKEN_STRUCT {
 /* Allocates memory for new token */
 token_t *init_token(int type, string_t *value, int row, int col);
 
+/* For parser error messages */
 char *token_to_str(token_t *token);
+
+/* For debugging lexer */
+void token_print_full(token_t *token);
+
 /* Prints tokens */
 void token_print(token_t *token);
 

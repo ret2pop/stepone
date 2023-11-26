@@ -91,6 +91,14 @@ char *token_to_str(token_t *token) {
   return NULL;
 }
 
+void token_print_full(token_t *token) {
+  if (token == NULL)
+    return;
+  if (token->value == NULL)
+    fprintf(stderr, "%s\n", token_to_str(token));
+  else
+    fprintf(stderr, "%s: %s\n", token_to_str(token), token->value->value);
+}
 void token_print(token_t *token) {
   if (token == NULL)
     return;

@@ -38,14 +38,13 @@ int main(int argc, char **argv) {
   /* TEST 1: LEXER (see files lexer.h, lexer.c, token.h, token.c, macros.h,
    * macros.c, better_string.h, better_string.c) */
   /* lexer_t *l; */
-  /* char *source = "int main: int argc, string argv { return 0; }"; */
-  /* l = init_lexer(source); */
+  /* l = init_lexer(buffer); */
   /* token_t *t = lexer_get_next(l); */
   /* token_print(t); */
   /* while (t != NULL) { */
   /*   token_free(t); */
   /*   t = lexer_get_next(l); */
-  /*   token_print(t); */
+  /*   token_print_full(t); */
   /* } */
   /* free(l); */
 
