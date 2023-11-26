@@ -53,7 +53,7 @@ token_t *lexer_move_with_token(lexer_t *lexer, int type, string_t *value) {
 }
 token_t *lexer_create_id(lexer_t *lexer) {
   string_t *str = init_string(NULL);
-  char keywords[6][6] = {"if", "else", "while", "return", "struct", "func"};
+  char keywords[6][7] = {"if", "else", "while", "return", "struct", "func"};
 
   char types[16][15] = {"int8",   "int16",  "int32", "uint8",
                         "uint16", "uint32", "float", "double",

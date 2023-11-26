@@ -129,6 +129,7 @@ ast_t *parse_var_assign(parser_t *p) {
 ast_t *parse_var(parser_t *p) {
   ast_t *n;
   ast_t *n2;
+
   string_t *str;
   int atcount = 0;
   int pcount = 0;
@@ -182,6 +183,20 @@ ast_t *parse_var(parser_t *p) {
     n->priority = 0;
     n->acount = atcount;
     n->pcount = pcount;
+    n->subnodes = malloc(sizeof(ast_t *));
+    n->size = 0;
+    while (p->t->type == TOKEN_PERIOD) {
+      parser_move(p);
+      if (p->t->type != TOKEN_ID)
+        parser_error(p);
+      n2 = init_ast(AST_VAR);
+      n2->string_value = string_copy(p->t->value);
+      n2->size = 0;
+      n->subnodes[n->size] = n2;
+      n->size++;
+      n->subnodes = realloc(n->subnodes, (n->size + 1) * sizeof(ast_t *));
+      parser_move(p);
+    }
   }
   return n;
 }
@@ -230,6 +245,10 @@ ast_t *parse_local(parser_t *p) {
   if (n->subnodes == NULL)
     die("malloc on subnodes");
   n->size = 0;
+  if (p->t->type != TOKEN_LBRACE) {
+    parser_error(p);
+  }
+
   parser_move(p);
   while (p->t->type != TOKEN_RBRACE) {
     v = parse_var_dec(p);
@@ -522,13 +541,16 @@ ast_t *parse_if_else(parser_t *p) {
   if (p->t->value != NULL) {
     if (strcmp(p->t->value->value, "else") == 0) {
       parser_move(p);
-      if (strcmp(p->t->value->value, "if") == 0) {
-        n2 = parse_if_else(p);
+      if (p->t->value != NULL) {
+        if (strcmp(p->t->value->value, "if") == 0) {
+          n2 = parse_if_else(p);
+        } else {
+          parser_error(p);
+        }
       } else if (p->t->type == TOKEN_LBRACE) {
         n2 = parse_block(p);
-      } else {
+      } else
         parser_error(p);
-      }
     } else
       n2 = NULL;
   } else

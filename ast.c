@@ -66,6 +66,11 @@ void ast_print(ast_t *n) {
     printf("Number: %f\n", n->num_value);
     break;
   case AST_VAR:
+    printf("Var: %s\n", n->string_value->value);
+    for (int i = 0; i < n->size; i++) {
+      ast_print(n);
+    }
+    break;
   case AST_STRING:
   case AST_TYPE:
     printf("Var, string, or type node: %s\n", n->string_value->value);
@@ -124,6 +129,13 @@ void ast_free(ast_t *n) {
     free(n);
     break;
   case AST_VAR:
+    string_free(n->string_value);
+    for (int i = 0; i < n->size; i++) {
+      ast_free(n->subnodes[i]);
+    }
+    free(n->subnodes);
+    free(n);
+    break;
   case AST_STRING:
     string_free(n->string_value);
     free(n);

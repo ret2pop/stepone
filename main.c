@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
   /* lexer_t *l; */
   /* l = init_lexer(buffer); */
   /* token_t *t = lexer_get_next(l); */
-  /* token_print(t); */
+  /* token_print_full(t); */
   /* while (t != NULL) { */
   /*   token_free(t); */
   /*   t = lexer_get_next(l); */
