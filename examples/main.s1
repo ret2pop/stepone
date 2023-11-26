@@ -1,18 +1,10 @@
-#include "loc/of/file.s1"
-
-global int x = 3;
-global int8 x = 7;
-
-struct sl_node {
-	int value;
-	\sl_node next;
-};
-
 func main: int argc \\string argv => int {
-	string s1;
-	string s2;
-	\int a;
+	int a
+	string s2
+	\int a
 }
 {
-	return 0;
+	a = 1234
+	return 3 <= (0 + 1) + 2 * 3
 }
+

@@ -33,6 +33,8 @@ void ast_print(ast_t *n) {
     }
     ast_print(n->subnodes[0]);
     ast_print(n->subnodes[1]);
+    if (n->ast_type != NULL)
+      ast_print(n->ast_type);
     break;
   case AST_VARDEC:
     printf("Variable decaration: %s, %s\n", n->type_name->value,
@@ -83,6 +85,7 @@ void ast_print(ast_t *n) {
   case AST_RETURN:
     printf("Return\n");
     ast_print(n->subnodes[0]);
+    break;
   case AST_STRUCTURE:
     printf("Struct %s:\n", n->string_value->value);
     ast_print(n->subnodes[0]);
@@ -99,9 +102,10 @@ void ast_free(ast_t *n) {
   case AST_LOCAL:
   case AST_FUNCCALL:
     for (int i = 0; i < n->size; i++) {
-      printf("iteration: %d\n", i);
       ast_free(n->subnodes[i]);
     }
+    if (n->type == AST_FUNCCALL)
+      string_free(n->string_value);
     free(n->subnodes);
     free(n);
     break;
@@ -109,9 +113,12 @@ void ast_free(ast_t *n) {
     for (int i = 0; i < n->size; i++) {
       ast_free(n->funcdef_params[i]);
     }
+    string_free(n->string_value);
     free(n->funcdef_params);
     ast_free(n->subnodes[0]);
     ast_free(n->subnodes[1]);
+    if (n->ast_type != NULL)
+      ast_free(n->ast_type);
     free(n->subnodes);
     free(n);
     break;
@@ -175,6 +182,7 @@ void ast_free(ast_t *n) {
     free(n);
     break;
   case AST_TYPE:
+    string_free(n->string_value);
     free(n);
     break;
   default:

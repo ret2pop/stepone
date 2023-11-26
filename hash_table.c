@@ -49,7 +49,6 @@ void sl_list_free(sl_list_t *l) {
   sl_node_t *tmp;
   while (cur != NULL) {
     string_free(cur->name);
-    ast_free(cur->value);
     tmp = cur->next;
     free(cur);
     cur = tmp;

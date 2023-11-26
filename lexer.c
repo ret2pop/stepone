@@ -115,12 +115,14 @@ token_t *lexer_create_number(lexer_t *lexer) {
 
 token_t *lexer_create_string(lexer_t *lexer) {
   string_t *str = init_string(NULL);
+  lexer_move(lexer);
   while (lexer->c != '"') {
     if (lexer->c == '\0')
       lexer_error(lexer);
     string_append(str, lexer->c);
     lexer_move(lexer);
   }
+  lexer_move(lexer);
   return lexer_create_token(lexer, TOKEN_STRING, str);
 }
 

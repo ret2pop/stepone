@@ -25,7 +25,7 @@ void parser_move(parser_t *p) {
 
 static ast_t *parse_inner_expr(parser_t *p) {
   switch (p->t->type) {
-  case TOKEN_LBRACE:
+  case TOKEN_LPAREN:
     return parse_math_expr(p);
   case TOKEN_INT:
     return parse_math_expr(p);
@@ -57,8 +57,6 @@ ast_t *parse_inside_block(parser_t *p) {
   }
 
   switch (p->t->type) {
-  case TOKEN_LBRACE:
-    return parse_math_expr(p);
   case TOKEN_LPAREN:
   case TOKEN_INT:
     return parse_math_expr(p);
@@ -85,8 +83,8 @@ ast_t *parse_var(parser_t *p) {
   ast_t *n;
   ast_t *n2;
   string_t *str;
-  int atcount;
-  int pcount;
+  int atcount = 0;
+  int pcount = 0;
   while (p->t->type == TOKEN_AT) {
     atcount++;
     parser_move(p);
@@ -111,6 +109,7 @@ ast_t *parse_var(parser_t *p) {
     if (n->subnodes == NULL)
       die("malloc on subnodes");
     n->size = 1;
+    parser_move(p);
     n->subnodes[0] = parse_inner_expr(p);
     if (n->subnodes[0]->type == AST_VARDEF) {
       parser_error(p);
@@ -251,7 +250,7 @@ ast_t *parse_function_dec(parser_t *p) {
     }
     n2 = init_ast(AST_TYPE);
     n2->string_value = string_copy(p->t->value);
-    n->ast_type = n;
+    func->ast_type = n2;
     parser_move(p);
   }
   if (p->t->type != TOKEN_LBRACE) {
