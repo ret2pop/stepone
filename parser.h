@@ -26,6 +26,7 @@ ast_t *parse_var_dec(parser_t *p);
 /* Parse what looks like a variable -- might be a function call */
 ast_t *parse_var(parser_t *p);
 
+/* Parses variable assignments and function calls */
 ast_t *parse_var_assign(parser_t *p);
 
 /* Parse function declaration -- defining the parameters, return value, and

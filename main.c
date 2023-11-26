@@ -49,25 +49,25 @@ int main(int argc, char **argv) {
   /* free(l); */
 
   /* TEST 2: PARSER (see files ast.h, ast.c, parser.h, parser.c) */
-  parser_t *p;
-  ast_t *root;
-  p = init_parser(buffer);
-  root = parse_all(p);
-  ast_print(root);
-  ast_free(root);
-  free(buffer);
+  /* parser_t *p; */
+  /* ast_t *root; */
+  /* p = init_parser(buffer); */
+  /* root = parse_all(p); */
+  /* ast_print(root); */
+  /* ast_free(root); */
+  /* free(buffer); */
 
   /* TEST 3: VALIDATOR (see files validate.h, validate.c, hash_table.h,
    * hash_table.c) */
 
-  /* parser_t *p; */
-  /* valid_t *v; */
-  /* ast_t *root; */
-  /* p = init_parser("main: int argc, \\\\string argv => { return 0 }"); */
-  /* root = parse_all(p); */
-  /* v = init_validator(root); */
-  /* validate(v); */
-  /* valid_free(v); */
+  parser_t *p;
+  valid_t *v;
+  ast_t *root;
+  p = init_parser(buffer);
+  root = parse_all(p);
+  v = init_validator(root);
+  validate(v);
+  valid_free(v);
 
   /* TEST 4: CODEGEN */
 }

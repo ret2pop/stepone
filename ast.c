@@ -187,6 +187,11 @@ void ast_free(ast_t *n) {
     free(n);
     break;
   case AST_STRUCTURE:
+    ast_free(n->subnodes[0]);
+    string_free(n->string_value);
+    free(n->subnodes);
+    free(n);
+    break;
   case AST_RETURN:
     ast_free(n->subnodes[0]);
     free(n->subnodes);

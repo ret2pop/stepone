@@ -1,16 +1,16 @@
-struct lol {
+struct imag {
 	int a
 	int b
 }
 
-func main: int argc \\string argv => int {
+func main: int argc \string argv => int {
 	int a
 	string s2
 	\int a
+	\void c
 }
 {
 	while a < b {
-		x = 3
 		a = a + 1
 	}
 
@@ -23,4 +23,3 @@ func main: int argc \\string argv => int {
 	}
 	return 3 <= (0 + 1) + 2 * 3
 }
-

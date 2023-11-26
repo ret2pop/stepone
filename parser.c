@@ -26,7 +26,6 @@ void parser_move(parser_t *p) {
 static ast_t *parse_inner_expr(parser_t *p) {
   switch (p->t->type) {
   case TOKEN_LPAREN:
-    return parse_math_expr(p);
   case TOKEN_ID:
   case TOKEN_INT:
   case TOKEN_FLOAT:
