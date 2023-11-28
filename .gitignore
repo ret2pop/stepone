@@ -1,2 +1,5 @@
 vgcore.*
-./stepone
+bin/**
+build/**
+.cache/**
+compile_commands.json

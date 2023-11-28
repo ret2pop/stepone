@@ -1,14 +1,16 @@
-#include "parser.h"
-#include "ast.h"
-#include "hash_table.h"
-#include "lexer.h"
-#include "macros.h"
-#include "token.h"
+#include <ast.h>
+#include <hash_table.h>
+#include <lexer.h>
+#include <macros.h>
+#include <parser.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <token.h>
 
+/* TODO: finish string parsing; parse list variable declarations; support for
+ * hexadecimal */
 parser_t *init_parser(char *source) {
   parser_t *p = malloc(sizeof(parser_t));
   p->l = init_lexer(source);
@@ -42,6 +44,19 @@ static ast_t *parse_inner_expr(parser_t *p) {
   }
 }
 
+ast_t *parse_global(parser_t *p) {
+  ast_t *n = init_ast(AST_GLOBAL);
+  n->subnodes = calloc(2, sizeof(ast_t *));
+  parser_move(p);
+  n->subnodes[0] = parse_var_dec(p);
+  if (p->t->type != TOKEN_EQUALS) {
+    parser_error(p);
+  }
+  parser_move(p);
+  n->subnodes[1] = parse_inner_expr(p);
+  return n;
+}
+
 ast_t *parse_inside_block(parser_t *p) {
   if (p->t->value != NULL) {
     if (strcmp(p->t->value->value, "if") == 0) {
@@ -52,24 +67,11 @@ ast_t *parse_inside_block(parser_t *p) {
       return parse_return(p);
     }
   }
-
   switch (p->t->type) {
-  case TOKEN_LPAREN:
-  case TOKEN_INT:
-    return parse_math_expr(p);
-  case TOKEN_FLOAT:
-    return parse_math_expr(p);
   case TOKEN_SLASH:
   case TOKEN_ID:
   case TOKEN_AT:
     return parse_var_assign(p);
-  case TOKEN_STRING:
-    return parse_string(p);
-  case TOKEN_LBRACKET:
-    return parse_list(p);
-  case TOKEN_SEMI:
-    parser_move(p);
-    return parse_inside_block(p);
   default:
     parser_error(p);
     return NULL;
@@ -613,33 +615,13 @@ ast_t *parse_expr(parser_t *p) {
     } else if (strcmp(p->t->value->value, "func") == 0) {
       return parse_function_dec(p);
     } else if (strcmp(p->t->value->value, "global") == 0) {
-      parser_move(p);
-      return parse_var_dec(p);
+      return parse_global(p);
     } else {
       parser_error(p);
     }
   }
-  switch (p->t->type) {
-  case TOKEN_SLASH:
-    return parse_var_dec(p);
-  case TOKEN_ID:
-  case TOKEN_LPAREN:
-  case TOKEN_INT:
-  case TOKEN_FLOAT:
-    return parse_math_expr(p);
-  case TOKEN_STRING:
-    return parse_string(p);
-  case TOKEN_LBRACKET:
-    return parse_list(p);
-  case TOKEN_AT:
-    return parse_var(p);
-  case TOKEN_SEMI:
-    parser_move(p);
-    return parse_expr(p);
-  default:
-    parser_error(p);
-    return NULL;
-  }
+  parser_error(p);
+  return NULL;
 }
 
 ast_t *parse_all(parser_t *p) {

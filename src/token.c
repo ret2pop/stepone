@@ -1,8 +1,8 @@
-#include "token.h"
-#include "better_string.h"
-#include "macros.h"
+#include <better_string.h>
+#include <macros.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <token.h>
 
 token_t *init_token(int type, string_t *value, int row, int col) {
   token_t *t = malloc(sizeof(token_t));

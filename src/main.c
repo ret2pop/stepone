@@ -1,12 +1,13 @@
-#include "ast.h"
-#include "better_string.h"
-#include "lexer.h"
-#include "macros.h"
-#include "parser.h"
-#include "token.h"
-#include "validate.h"
+#include <ast.h>
+#include <better_string.h>
+#include <codegen.h>
+#include <lexer.h>
+#include <macros.h>
+#include <parser.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <token.h>
+#include <validate.h>
 
 void usage() { fprintf(stderr, "Usage: stepone [file]\n"); }
 
@@ -65,9 +66,28 @@ int main(int argc, char **argv) {
   ast_t *root;
   p = init_parser(buffer);
   root = parse_all(p);
+  printf("parsing stage:\n");
+  ast_print(root);
+  printf("validation:\n");
   v = init_validator(root);
   validate(v);
   valid_free(v);
+  ast_free(root);
 
   /* TEST 4: CODEGEN */
+  /* printf("parsing stage:\n"); */
+  /* parser_t *p = init_parser(buffer); */
+  /* ast_t *root = parse_all(p); */
+  /* ast_print(root); */
+
+  /* printf("validation:\n"); */
+  /* valid_t *v = init_validator(root); */
+  /* validate(v); */
+  /* valid_free(v); */
+
+  /* printf("code generation:\n"); */
+  /* gen_t *g = init_gen(root); */
+  /* generate(g); */
+  /* printf("%s\n", g->s->value); */
+  /* gen_free(g); */
 }

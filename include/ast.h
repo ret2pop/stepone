@@ -42,6 +42,7 @@ typedef struct AST_STRUCT {
     AST_LOCAL,
     AST_TYPE,
     AST_LIST,
+    AST_GLOBAL,
   } type;
 
   /* Based on the type of the node, these values are used differently */

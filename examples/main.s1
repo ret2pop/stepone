@@ -12,14 +12,17 @@ func main: int argc \string argv => int {
 {
 	while a < b {
 		a = a + 1
+		a = b
 	}
 
 	if 1 == 2 {
-		return 0
+		x = 3
+		y = "hello"
 	} else if 1 == 3 {
-		return 1
+		x = 4
+		y = 33
 	} else {
 		return 2
 	}
-	return 3 <= (0 + 1) + 2 * 3
+	return 4 * 3 + 3 + 3 + 3 <= (0 + 1) + 2 * 3
 }

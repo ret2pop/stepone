@@ -15,4 +15,8 @@ gen_t *init_gen(ast_t *root);
 
 /* Generates all the code */
 void generate(gen_t *g);
+
+/* Frees the generator, the AST, and the generated string */
+void gen_free(gen_t *g);
+
 #endif

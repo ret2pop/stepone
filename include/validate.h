@@ -10,11 +10,34 @@ typedef struct {
   ast_t *cur;
   hash_table_t *func_sig;
   hash_table_t *global_sig;
+  hash_table_t *struct_sig;
   hash_table_t *local_sig;
 } valid_t;
 
 /* Allocates memory for new validator */
 valid_t *init_validator(ast_t *n);
+
+void validate_list(valid_t *v);
+
+void valdate_math_expr(valid_t *v);
+
+void validate_struct(valid_t *v);
+
+void validate_dec_block(valid_t *v);
+
+void validate_if_else(valid_t *v);
+
+void validate_while(valid_t *v);
+
+void validate_inner_expr(valid_t *v);
+
+void validate_vardef(valid_t *v);
+
+void validate_block_statement(valid_t *v);
+
+void validate_block(valid_t *v);
+
+void validate_funcdef(valid_t *v);
 
 /* Validate expression */
 void validate_expr(valid_t *v);

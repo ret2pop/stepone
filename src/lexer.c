@@ -1,7 +1,7 @@
-#include "lexer.h"
-#include "better_string.h"
-#include "macros.h"
-#include "token.h"
+#include <better_string.h>
+#include <lexer.h>
+#include <macros.h>
+#include <token.h>
 
 #include <ctype.h>
 #include <stdbool.h>

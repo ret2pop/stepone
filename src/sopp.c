@@ -1,4 +1,4 @@
-#include "sopp.h"
+#include <sopp.h>
 
 #include <stdbool.h>
 #include <stdlib.h>

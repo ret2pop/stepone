@@ -1,14 +1,24 @@
-CC = gcc
-CFLAGS  = -g -Wall
+CC := gcc 
+SRCDIR := src
+BUILDDIR := build
+TARGET := bin/stepone
+SRCEXT := c
+SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+CFLAGS := 
+LIB := -L lib
+INC := -I include
 
-stepone: main.c lexer.c better_string.c parser.c ast.c token.c macros.c
-	cc *.c $(CFLAGS) -o stepone 
+$(TARGET): $(OBJECTS)
+	@echo " Linking..."
+	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB) -O3
+
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@echo " Building..."
+	@mkdir -p $(BUILDDIR)
+	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $< -save-temps -O3
 
 clean:
-	-rm stepone
+	@echo " Cleaning..."; 
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
-install:
-	cp nxs /usr/local/bin/
-
-uninstall:
-	-rm /usr/local/bin/stepone

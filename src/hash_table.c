@@ -1,6 +1,6 @@
-#include "hash_table.h"
-#include "ast.h"
-#include "better_string.h"
+#include <ast.h>
+#include <better_string.h>
+#include <hash_table.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,17 +21,18 @@ sl_list_t *init_sl_list() {
 
 void sl_list_add(sl_list_t *l, string_t *name, ast_t *n) {
   sl_node_t *cur = l->head;
-  if (l->head == NULL) {
-    l->head = init_sl_node(string_copy(name), ast_copy(n));
+  if (cur == NULL) {
+    cur = init_sl_node(name, n);
+  } else {
+    while (cur->next != NULL && strcmp(cur->name->value, name->value) != 0) {
+      cur = cur->next;
+    }
+    if (strcmp(cur->name->value, name->value) == 0) {
+      ast_free(cur->value);
+      cur->value = n;
+    }
+    cur->next = init_sl_node(name, n);
   }
-  while (cur->next != NULL && strcmp(cur->name->value, name->value) != 0) {
-    cur = cur->next;
-  }
-  if (strcmp(cur->name->value, name->value) == 0) {
-    ast_free(cur->value);
-    cur->value = n;
-  }
-  cur->next = init_sl_node(string_copy(name), ast_copy(n));
 }
 
 ast_t *sl_list_get(sl_list_t *l, string_t *name) {
@@ -48,7 +49,6 @@ void sl_list_free(sl_list_t *l) {
   sl_node_t *cur = l->head;
   sl_node_t *tmp;
   while (cur != NULL) {
-    string_free(cur->name);
     tmp = cur->next;
     free(cur);
     cur = tmp;
